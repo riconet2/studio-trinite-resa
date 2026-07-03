@@ -216,7 +216,7 @@ function importResas(input){
   reader.readAsText(file);
   input.value='';
 }
-function exportResas_placeholder(){}activeResaIndex=i;renderResaList();renderTemplates();}
+function selectResa(i){activeResaIndex=i;renderResaList();renderTemplates();}
 function editResa(i){
   var r=reservations[i];
   document.getElementById('f-prenom').value=r.prenom;
