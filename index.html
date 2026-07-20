@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio La Trinité</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; min-height: 100vh; }
+.app { max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; padding-bottom: 80px; }
+
+.nav { display: flex; border-bottom: 1px solid #e8e8e3; background: #fff; position: sticky; top: 0; z-index: 10; }
+.nav-btn { flex: 1; padding: 14px 8px 11px; font-size: 12px; font-weight: 500; background: none; border: none; cursor: pointer; border-bottom: 3px solid transparent; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
+.nav-btn i { font-size: 22px; }
+#nav-resa     { color: #378add; border-bottom-color: #B5D4F4; }
+#nav-messages { color: #63991a; border-bottom-color: #C0DD97; }
+#nav-planning { color: #ba7517; border-bottom-color: #FAC775; }
+#nav-resa.active     { color: #185fa5; border-bottom-color: #378add; background: #E6F1FB; }
+#nav-messages.active { color: #3b6d11; border-bottom-color: #63991a; background: #EAF3DE; }
+#nav-planning.active { color: #854f0b; border-bottom-color: #ba7517; background: #FAEEDA; }
+
+.section { display: none; padding: 16px; }
+.section.active { display: block; }
+
+.hdr-bar { border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+.hdr-bar i { font-size: 24px; }
+.hdr-bar span { font-size: 15px; font-weight: 500; }
+.hdr-resa { background: #E6F1FB; } .hdr-resa i, .hdr-resa span { color: #185fa5; }
+.hdr-msg  { background: #EAF3DE; } .hdr-msg  i, .hdr-msg  span { color: #3b6d11; }
+.hdr-plan { background: #FAEEDA; } .hdr-plan i, .hdr-plan span { color: #854f0b; }
+
+/* RÉSERVATION */
+.card { background: #fff; border: 1px solid #B5D4F4; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 12px; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 12px; color: #185fa5; font-weight: 500; margin-bottom: 4px; }
+.field input { width: 100%; padding: 10px 12px; font-size: 15px; border: 1px solid #B5D4F4; border-radius: 8px; background: #E6F1FB; color: #1a1a1a; font-family: inherit; -webkit-appearance: none; }
+.field input:focus { outline: none; border-color: #378add; background: #fff; }
+.row2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.btn-resa { width: 100%; padding: 13px; background: #378add; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-resa:active { opacity: .85; }
+
+.resa-item { background: #E6F1FB; border: 1px solid #B5D4F4; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 10px; }
+.resa-item.selected { border-color: #378add; border-width: 2px; }
+.guest-name { font-size: 16px; font-weight: 600; color: #1a1a1a; }
+.resa-dates { font-size: 13px; color: #185fa5; margin-bottom: 8px; }
+.resa-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.resa-meta { display: flex; gap: 14px; font-size: 12px; color: #185fa5; margin-bottom: 10px; }
+.btn-select { background: #378add; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; color: #fff; cursor: pointer; font-family: inherit; font-weight: 500; }
+.selected-label { font-size: 12px; color: #185fa5; display: flex; align-items: center; gap: 4px; }
+
+/* BOUTON LIEN SÉJOUR */
+.btn-lien-sejour { width: 100%; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; background: #e07b54; color: #fff; border: none; border-radius: 8px; padding: 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+.btn-lien-sejour:active { opacity: .85; }
+.btn-lien-sejour.copie { background: #63991a; }
+
+.badge { font-size: 11px; padding: 3px 9px; border-radius: 6px; font-weight: 600; }
+.badge-active   { background: #EAF3DE; color: #3B6D11; }
+.badge-upcoming { background: #E6F1FB; color: #185FA5; }
+.badge-past     { background: #f0f0ed; color: #999; }
+
+/* MESSAGES */
+.lang-toggle { display: flex; gap: 6px; margin-bottom: 14px; }
+.lang-btn { padding: 7px 18px; border: 1px solid #C0DD97; border-radius: 8px; font-size: 13px; font-weight: 500; background: #EAF3DE; cursor: pointer; color: #3b6d11; font-family: inherit; }
+.lang-btn.active { background: #3b6d11; color: #fff; border-color: #3b6d11; }
+.notice { background: #EAF3DE; border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #3b6d11; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.group-label { font-size: 11px; font-weight: 600; color: #639922; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+.template-group { margin-bottom: 18px; }
+.tpl-card { background: #fff; border: 1px solid #C0DD97; border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
+.tpl-header { padding: 13px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.tpl-header:active { background: #EAF3DE; }
+.tpl-title { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+.tpl-timing { font-size: 11px; color: #3b6d11; background: #EAF3DE; padding: 2px 9px; border-radius: 6px; }
+.tpl-body { display: none; padding: 0 16px 16px; border-top: 1px solid #C0DD97; }
+.tpl-body.open { display: block; }
+.msg-text { font-size: 13px; color: #555; line-height: 1.65; white-space: pre-wrap; margin: 12px 0; padding: 12px; background: #EAF3DE; border-radius: 8px; }
+.copy-btn { display: flex; align-items: center; gap: 6px; background: #3b6d11; border: none; border-radius: 8px; padding: 10px 16px; font-size: 13px; color: #fff; cursor: pointer; font-family: inherit; font-weight: 500; }
+.copy-btn:active { opacity: .85; }
+.copy-btn.copied { background: #EAF3DE; color: #3b6d11; border: 1px solid #639922; }
+
+/* PLANNING */
+.cal-box { background: #FAEEDA; border: 1px solid #FAC775; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 14px; }
+.cal-status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #854f0b; margin-bottom: 10px; }
+.dot-green { width: 8px; height: 8px; border-radius: 50%; background: #97c459; flex-shrink: 0; }
+.btn-cal { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border: none; border-radius: 8px; background: #ba7517; font-size: 13px; cursor: pointer; color: #fff; font-family: inherit; font-weight: 500; text-decoration: none; }
+.stay-card { border: 1px solid #FAC775; border-radius: 12px; margin-bottom: 12px; overflow: hidden; background: #fff; }
+.stay-header { padding: 12px 16px; background: #FAEEDA; display: flex; justify-content: space-between; align-items: center; }
+.stay-name { font-size: 15px; font-weight: 600; color: #633806; }
+.stay-dates { font-size: 12px; color: #854f0b; margin-top: 2px; }
+.stay-alerts { border-top: 1px solid #FAC775; }
+.alert-row { display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 1px solid #FAEEDA; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.alert-row:last-child { border-bottom: none; }
+.alert-row:active { background: #FAEEDA; }
+.alert-emoji { font-size: 18px; width: 26px; text-align: center; flex-shrink: 0; }
+.alert-label { font-size: 13px; color: #1a1a1a; font-weight: 500; }
+.alert-sub { font-size: 11px; color: #aaa; margin-top: 1px; }
+.alert-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.alert-dot.urgent { background: #E24B4A; }
+.alert-dot.soon   { background: #EF9F27; }
+.alert-dot.done   { background: #97C459; }
+.alert-arrow { font-size: 16px; color: #ccc; }
+.empty-state { background: #FAEEDA; border-radius: 10px; padding: 14px; font-size: 13px; color: #854f0b; display: flex; align-items: center; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="nav">
+    <button class="nav-btn active" id="nav-resa" onclick="showSection('resa')"><i class="ti ti-home"></i>Réservation</button>
+    <button class="nav-btn" id="nav-messages" onclick="showSection('messages')"><i class="ti ti-checklist"></i>Suivi</button>
+    <button class="nav-btn" id="nav-planning" onclick="showSection('planning')"><i class="ti ti-calendar"></i>Planning</button>
+  </nav>
+
+  <div class="section active" id="section-resa">
+    <div class="hdr-bar hdr-resa"><i class="ti ti-home"></i><span>Nouvelle réservation</span></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <button onclick="exportResas()" style="flex:1;background:#f0f0ed;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">💾 Exporter</button>
+      <label style="flex:1;background:#f0f0ed;border-radius:8px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;display:block;">📂 Importer<input type="file" accept=".json" onchange="importResas(this)" style="display:none;"></label>
+    </div>
+    <div class="card">
+      <div class="field"><label>Prénom du voyageur</label><input type="text" id="f-prenom" placeholder="ex. Sophie" autocomplete="off"></div>
+      <div class="row2">
+        <div class="field"><label>Date d'arrivée</label><input type="date" id="f-arrivee"></div>
+        <div class="field"><label>Date de départ</label><input type="date" id="f-depart"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Heure d'arrivée</label><input type="time" id="f-heure" value="16:00"></div>
+        <div class="field"><label>Code boîte à clé</label><input type="text" id="f-code" placeholder="ex. 4821" maxlength="6" autocomplete="off"></div>
+      </div>
+      <button class="btn-resa" onclick="saveResa()">Enregistrer la réservation</button>
+    </div>
+    <div id="resa-list"></div>
+  </div>
+
+  <div class="section" id="section-messages">
+    <div class="hdr-bar hdr-msg"><i class="ti ti-checklist"></i><span>Suivi hôte</span></div>
+    <div class="notice" id="no-resa-msg" style="display:none"><i class="ti ti-info-circle"></i> Aucune réservation sélectionnée.</div>
+    <div id="suivi-guest-name" style="font-size:14px;font-weight:600;color:#3b6d11;margin-bottom:12px;display:none;"></div>
+    <div id="templates-list"></div>
+  </div>
+
+  <div class="section" id="section-planning">
+    <div class="hdr-bar hdr-plan"><i class="ti ti-calendar"></i><span>Planning des séjours</span></div>
+    <div class="cal-box">
+      <div class="cal-status"><span class="dot-green"></span> Google Calendar connecté</div>
+      <a class="btn-cal" href="https://calendar.google.com" target="_blank"><i class="ti ti-external-link"></i> Ouvrir le calendrier</a>
+    </div>
+    <div id="planning-list"></div>
+  </div>
+</div>
+
+<script>
+var reservations=JSON.parse(localStorage.getItem('studio_resas')||'[]');
+var currentLang='fr';
+var activeResaIndex=reservations.length?0:null;
+
+/* URL de la page séjour des voyageurs (pour le bouton Lien séjour) */
+var PAGE_SEJOUR='https://riconet2.github.io/studio-trinite/';
+
+var ICONS={confirmation:'✅',bienvenue:'👋',milieu:'💬',depart:'🚪',visite:'🔍',menage:'🧹',avis:'⭐'};
+var NAMES={confirmation:'Confirmation reçue',bienvenue:'Message de bienvenue',milieu:'Message mi-séjour',depart:'Départ voyageur',visite:'Visite du logement',menage:'Ménage avant arrivée',avis:'Message merci + avis'};
+var SUIVI=[
+  {id:'confirmation', timing:'À la réservation', hasMsg:false,
+   note:'Réservation confirmée par Airbnb. Aucun message manuel nécessaire.'},
+  {id:'bienvenue', timing:"Jour d'arrivée", hasMsg:true,
+   fr:function(v){return 'Bonjour '+v.prenom+',\n\nBienvenue à La Trinité-sur-Mer ! J\'espère que votre installation s\'est bien passée.\n\nJe reste disponible si vous avez la moindre question. Profitez bien du studio et de la région ! 🌊';},
+   en:function(v){return 'Hello '+v.prenom+',\n\nWelcome to La Trinité-sur-Mer! I hope you\'ve settled in comfortably.\n\nI\'m available if you have any questions. Enjoy the studio and the area! 🌊';}},
+  {id:'milieu', timing:'J+3 après arrivée', hasMsg:true,
+   fr:function(v){return 'Bonjour '+v.prenom+',\n\nJ\'espère que votre séjour se passe bien ! Tout est ok de votre côté ?\n\nN\'hésitez pas à me contacter si besoin. 😊';},
+   en:function(v){return 'Hello '+v.prenom+',\n\nI hope you\'re enjoying your stay! Everything ok on your end?\n\nFeel free to reach out if you need anything. 😊';}},
+  {id:'depart', timing:'Jour de départ', hasMsg:false,
+   note:'Départ prévu avant 10h. Vérifier la boîte à clé.'},
+  {id:'visite', timing:'Après départ', hasMsg:false,
+   note:'Visiter le logement pour état des lieux rapide.'},
+  {id:'menage', timing:'Veille de la prochaine arrivée', hasMsg:false,
+   note:'Ménage complet avant l\'arrivée du prochain voyageur.'},
+  {id:'avis', timing:'Après départ', hasMsg:true,
+   fr:function(v){return 'Bonjour '+v.prenom+',\n\nMerci d\'avoir séjourné au studio ! J\'espère que vous avez passé un agréable séjour à La Trinité-sur-Mer.\n\nÀ bientôt peut-être !\nEric';},
+   en:function(v){return 'Hello '+v.prenom+',\n\nThank you for staying at the studio! I hope you had a wonderful time in La Trinité-sur-Mer.\n\nHope to see you again!\nEric';}},
+];
+
+function getVars(){if(activeResaIndex!==null&&reservations[activeResaIndex])return reservations[activeResaIndex];return{prenom:'[Prénom]',arrivee:'[date arrivée]',depart:'[date départ]',heure:'[heure]',code:'[code]'};}
+function formatDate(d){if(!d)return'';var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+
+function saveResa(){
+  var prenom=document.getElementById('f-prenom').value.trim();
+  var arrivee=document.getElementById('f-arrivee').value;
+  var depart=document.getElementById('f-depart').value;
+  var heure=document.getElementById('f-heure').value;
+  var code=document.getElementById('f-code').value.trim();
+  if(!prenom||!arrivee||!depart){alert('Merci de remplir le prénom et les dates.');return;}
+  reservations.push({prenom:prenom,arrivee:formatDate(arrivee),depart:formatDate(depart),heure:heure,code:code,raw_arrivee:arrivee,raw_depart:depart});
+  reservations.sort(function(a,b){return a.raw_arrivee<b.raw_arrivee?-1:a.raw_arrivee>b.raw_arrivee?1:0;});
+  activeResaIndex=0;
+  localStorage.setItem('studio_resas',JSON.stringify(reservations));
+  document.getElementById('f-prenom').value='';document.getElementById('f-arrivee').value='';
+  document.getElementById('f-depart').value='';document.getElementById('f-heure').value='16:00';document.getElementById('f-code').value='';
+  renderResaList();renderTemplates();renderPlanning();
+}
+function exportResas(){
+  if(!reservations.length){alert('Aucune réservation à exporter.');return;}
+  var data=JSON.stringify(reservations,null,2);
+  var blob=new Blob([data],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='reservations-studio-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+function importResas(input){
+  var file=input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=JSON.parse(e.target.result);
+      if(!Array.isArray(data))throw new Error('Format invalide');
+      if(confirm('Importer '+data.length+' réservation(s) ? Les données actuelles seront remplacées.')){
+        reservations=data;
+        localStorage.setItem('studio_resas',JSON.stringify(reservations));
+        activeResaIndex=reservations.length?0:null;
+        renderResaList();renderTemplates();renderPlanning();
+        alert('✅ Import réussi !');
+      }
+    }catch(err){alert('❌ Fichier invalide. Vérifiez que c\'est bien un export de l\'application.');}
+  };
+  reader.readAsText(file);
+  input.value='';
+}
+function selectResa(i){activeResaIndex=i;renderResaList();renderTemplates();}
+function editResa(i){
+  var r=reservations[i];
+  document.getElementById('f-prenom').value=r.prenom;
+  document.getElementById('f-arrivee').value=r.raw_arrivee;
+  document.getElementById('f-depart').value=r.raw_depart;
+  document.getElementById('f-heure').value=r.heure;
+  document.getElementById('f-code').value=r.code||'';
+  reservations.splice(i,1);
+  if(activeResaIndex>=reservations.length)activeResaIndex=reservations.length?0:null;
+  localStorage.setItem('studio_resas',JSON.stringify(reservations));
+  renderResaList();renderTemplates();renderPlanning();
+  showSection('resa');
+  document.getElementById('f-prenom').focus();
+}
+function deleteResa(i){
+  if(!confirm('Supprimer la réservation de '+reservations[i].prenom+' ?'))return;
+  reservations.splice(i,1);
+  localStorage.setItem('studio_resas',JSON.stringify(reservations));
+  if(activeResaIndex>=reservations.length)activeResaIndex=reservations.length?0:null;
+  renderResaList();renderTemplates();renderPlanning();
+}
+
+/* ===== LIEN SÉJOUR PERSONNALISÉ ===== */
+function copierLienSejour(i,btn){
+  var r=reservations[i];
+  if(!r||!r.raw_arrivee||!r.raw_depart)return;
+  var lien=PAGE_SEJOUR+'?arrivee='+r.raw_arrivee+'&depart='+r.raw_depart;
+  function confirme(){
+    btn.classList.add('copie');
+    btn.innerHTML='✓ Lien copié !';
+    setTimeout(function(){
+      btn.classList.remove('copie');
+      btn.innerHTML='🔗 Copier le lien séjour';
+    },2000);
+  }
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(lien).then(confirme).catch(function(){prompt('Copiez ce lien :',lien);});
+  } else {
+    var ta=document.createElement('textarea');ta.value=lien;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);confirme();
+  }
+}
+
+function renderResaList(){
+  var el=document.getElementById('resa-list');
+  if(!reservations.length){el.innerHTML='';return;}
+  var today=new Date();today.setHours(0,0,0,0);
+  el.innerHTML=reservations.map(function(r,i){
+    var arr=new Date(r.raw_arrivee),dep=new Date(r.raw_depart);
+    var isActive=today>=arr&&today<=dep,isUpcoming=arr>today;
+    var badge=isActive?'<span class="badge badge-active">En cours</span>':isUpcoming?'<span class="badge badge-upcoming">À venir</span>':'<span class="badge badge-past">Passée</span>';
+    var isSel=activeResaIndex===i;
+    return '<div class="resa-item'+(isSel?' selected':'')+'">'+
+      '<div class="resa-top"><div><div class="guest-name">'+r.prenom+'</div><div class="resa-dates">'+r.arrivee+' → '+r.depart+'</div></div>'+badge+'</div>'+
+      '<div class="resa-meta"><span><i class="ti ti-clock" style="font-size:13px;vertical-align:-1px"></i> '+r.heure+'</span><span><i class="ti ti-key" style="font-size:13px;vertical-align:-1px"></i> '+(r.code||'—')+'</span></div>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">'+
+      (!isSel?'<button class="btn-select" onclick="selectResa('+i+')">Utiliser pour les messages</button>':'<div class="selected-label"><i class="ti ti-check" style="font-size:13px"></i> Sélectionnée</div>')+
+      '<div style="display:flex;gap:4px;"><button onclick="editResa('+i+')" style="background:none;border:none;cursor:pointer;font-size:20px;padding:4px 6px;" title="Modifier">✏️</button>'+
+      '<button onclick="deleteResa('+i+')" style="background:none;border:none;cursor:pointer;font-size:20px;padding:4px 6px;" title="Supprimer">🗑️</button></div>'+
+      '</div>'+
+      '<button class="btn-lien-sejour" onclick="copierLienSejour('+i+',this)">🔗 Copier le lien séjour</button>'+
+      '</div>';
+  }).join('');
+}
+function renderTemplates(){
+  var v=getVars();
+  var noResa=activeResaIndex===null;
+  document.getElementById('no-resa-msg').style.display=noResa?'flex':'none';
+  var nameEl=document.getElementById('suivi-guest-name');
+  if(!noResa&&reservations[activeResaIndex]){nameEl.style.display='block';nameEl.innerHTML='👤 Séjour de '+reservations[activeResaIndex].prenom;}
+  else{nameEl.style.display='none';}
+  document.getElementById('templates-list').innerHTML=SUIVI.map(function(s){
+    var msgHtml='';
+    if(s.hasMsg){
+      var txtFr=s.fr(v),txtEn=s.en(v);
+      msgHtml='<div class="tpl-body" id="tpl-'+s.id+'">'+
+        '<div class="lang-toggle" style="padding:12px 0 4px;">'+
+        '<button class="lang-btn'+(currentLang==='fr'?' active':'')+'" onclick="setLangTpl(\'fr\',\''+s.id+'\')">FR</button>'+
+        '<button class="lang-btn'+(currentLang==='en'?' active':'')+'" onclick="setLangTpl(\'en\',\''+s.id+'\')">EN</button>'+
+        '</div>'+
+        '<div class="msg-text" id="msgtxt-'+s.id+'">'+(currentLang==='fr'?txtFr:txtEn).replace(/\n/g,'<br>')+'</div>'+
+        '<button class="copy-btn" id="copy-'+s.id+'" onclick="copyMsg(\''+s.id+'\')"><i class="ti ti-copy"></i> Copier</button>'+
+        '</div>';
+    } else {
+      msgHtml='<div class="tpl-body" id="tpl-'+s.id+'">'+
+        '<div style="font-size:13px;color:#854f0b;background:#FAEEDA;border-radius:8px;padding:12px;margin:12px 0;">'+s.note+'</div>'+
+        '</div>';
+    }
+    return '<div class="tpl-card">'+
+      '<div class="tpl-header" onclick="toggleTpl(\''+s.id+'\')">'+
+      '<span class="tpl-title">'+ICONS[s.id]+' '+NAMES[s.id]+'</span>'+
+      '<span class="tpl-timing">'+s.timing+'</span></div>'+
+      msgHtml+'</div>';
+  }).join('');
+}
+function setLangTpl(l,id){
+  currentLang=l;
+  var v=getVars();
+  var s=SUIVI.filter(function(x){return x.id===id;})[0];
+  if(s&&s.hasMsg){
+    var el=document.getElementById('msgtxt-'+id);
+    if(el)el.innerHTML=(l==='fr'?s.fr(v):s.en(v)).replace(/\n/g,'<br>');
+    document.querySelectorAll('#tpl-'+id+' .lang-btn').forEach(function(b,i){
+      b.classList.toggle('active',(i===0&&l==='fr')||(i===1&&l==='en'));
+    });
+  }
+}
+function toggleTpl(id){document.getElementById('tpl-'+id).classList.toggle('open');}
+function copyMsg(id){
+  var s=SUIVI.filter(function(x){return x.id===id;})[0];
+  if(!s||!s.hasMsg)return;
+  var text=currentLang==='fr'?s.fr(getVars()):s.en(getVars());
+  if(navigator.clipboard){navigator.clipboard.writeText(text).then(function(){showCopied(id);});}
+  else{var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showCopied(id);}
+}
+function showCopied(id){
+  var btn=document.getElementById('copy-'+id);
+  btn.classList.add('copied');btn.innerHTML='<i class="ti ti-check"></i> Copié !';
+  setTimeout(function(){btn.classList.remove('copied');btn.innerHTML='<i class="ti ti-copy"></i> Copier';},2000);
+}
+function setLang(l){currentLang=l;renderTemplates();}
+function gcalDate(dateStr,offsetDays){var d=new Date(dateStr+'T12:00:00');d.setDate(d.getDate()+(offsetDays||0));var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return y+m+day;}
+function gcalLink(title,dateStr,offsetDays){var dt=gcalDate(dateStr,offsetDays);var y=parseInt(dt.slice(0,4)),m=parseInt(dt.slice(4,6))-1,d=parseInt(dt.slice(6,8));var nextD=new Date(y,m,d+1);var dtEnd=nextD.getFullYear()+String(nextD.getMonth()+1).padStart(2,'0')+String(nextD.getDate()).padStart(2,'0');return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(title)+'&dates='+dt+'/'+dtEnd+'&details='+encodeURIComponent('Studio La Trinité-sur-Mer');}
+function renderPlanning(){
+  var el=document.getElementById('planning-list');
+  if(!reservations.length){el.innerHTML='<div class="empty-state"><i class="ti ti-info-circle"></i> Aucune réservation enregistrée.</div>';return;}
+  var today=new Date();today.setHours(0,0,0,0);var dayMs=86400000;
+  var checks=[
+    {id:'confirmation',always:true},
+    {id:'bienvenue',onArrival:true},
+    {id:'milieu',dayAfterArr:3},
+    {id:'depart',onDepart:true},
+    {id:'visite',afterDepart:true,offset:0},
+    {id:'menage',beforeNextArr:1},
+    {id:'avis',afterDepart:true,offset:1}
+  ];
+  el.innerHTML=reservations.map(function(r,ri){
+    var arr=new Date(r.raw_arrivee),dep=new Date(r.raw_depart);
+    var diffArr=Math.round((arr-today)/dayMs),diffDep=Math.round((dep-today)/dayMs);
+    var isActive=today>=arr&&today<=dep,isPast=dep<today;
+    var badge=isActive?'<span class="badge badge-active">En cours</span>':isPast?'<span class="badge badge-past">Terminée</span>':'<span class="badge badge-upcoming">À venir</span>';
+    var calLinks={
+      confirmation:gcalLink('✅ Confirmation '+r.prenom,r.raw_arrivee,0),
+      bienvenue:gcalLink('👋 Bienvenue '+r.prenom,r.raw_arrivee,0),
+      milieu:gcalLink('💬 Mi-séjour '+r.prenom,r.raw_arrivee,3),
+      depart:gcalLink('🚪 Départ '+r.prenom,r.raw_depart,0),
+      visite:gcalLink('🔍 Visite logement '+r.prenom,r.raw_depart,0),
+      menage:gcalLink('🧹 Ménage avant '+r.prenom,r.raw_arrivee,-1),
+      avis:gcalLink('⭐ Avis '+r.prenom,r.raw_depart,1)
+    };
+    var alerts=checks.map(function(c){
+      var status='',urgency='done';
+      if(c.always){status='Confirmé';urgency='done';}
+      else if(c.onArrival){if(diffArr===0){status="Aujourd'hui";urgency='urgent';}else if(diffArr>0){status='Dans '+diffArr+' j';urgency=diffArr<=2?'soon':'done';}else{status='Passé';urgency='done';}}
+      else if(c.dayAfterArr!=null){var d=new Date(r.raw_arrivee+'T12:00:00');d.setDate(d.getDate()+c.dayAfterArr);var diff=Math.round((d-today)/dayMs);if(diff===0){status="Aujourd'hui";urgency='urgent';}else if(diff>0){status='Dans '+diff+' j';urgency=diff<=1?'soon':'done';}else{status='Passé';urgency='done';}}
+      else if(c.onDepart){if(diffDep===0){status="Aujourd'hui";urgency='urgent';}else if(diffDep>0){status='Dans '+diffDep+' j';urgency=diffDep<=1?'soon':'done';}else{status='Passé';urgency='done';}}
+      else if(c.afterDepart!=null){var d2=new Date(r.raw_depart+'T12:00:00');d2.setDate(d2.getDate()+c.offset);var diff2=Math.round((d2-today)/dayMs);if(diff2===0){status="Aujourd'hui";urgency='urgent';}else if(diff2>0){status='Dans '+diff2+' j';urgency=diff2<=1?'soon':'done';}else{status='Passé';urgency='done';}}
+      else if(c.beforeNextArr!=null){var d3=new Date(r.raw_arrivee+'T12:00:00');d3.setDate(d3.getDate()-c.beforeNextArr);var diff3=Math.round((d3-today)/dayMs);if(diff3===0){status="Aujourd'hui";urgency='urgent';}else if(diff3>0){status='Dans '+diff3+' j';urgency=diff3<=1?'soon':'done';}else{status='Passé';urgency='done';}}
+      return{id:c.id,status:status,urgency:urgency};
+    });
+    var allLinks=Object.values(calLinks).map(function(l){return encodeURIComponent(l);}).join('|||');
+    return '<div class="stay-card">'+
+      '<div class="stay-header"><div><div class="stay-name">'+r.prenom+'</div><div class="stay-dates">'+r.arrivee+' → '+r.depart+'</div></div>'+badge+'</div>'+
+      '<div style="padding:10px 16px;border-top:1px solid #FAC775;"><button onclick="addAllToAgenda(\''+encodeURIComponent(JSON.stringify(calLinks))+'\')" style="width:100%;background:#ba7517;color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">📅 Tout ajouter à l\'agenda</button></div>'+
+      '<div class="stay-alerts">'+alerts.map(function(a){
+        return '<div class="alert-row">'+
+          '<span class="alert-emoji">'+ICONS[a.id]+'</span>'+
+          '<div style="flex:1"><div class="alert-label">'+NAMES[a.id]+'</div><div class="alert-sub">'+a.status+'</div></div>'+
+          '<a href="'+calLinks[a.id]+'" target="_blank" style="margin-left:8px;font-size:20px;text-decoration:none;" title="Ajouter à Google Agenda">📅</a>'+
+          '<span class="alert-dot '+a.urgency+'"></span></div>';
+      }).join('')+'</div>'+
+      '</div>';
+  }).join('');
+}
+function addAllToAgenda(linksJson){
+  var links=JSON.parse(decodeURIComponent(linksJson));
+  var keys=Object.keys(links);
+  var modal=document.createElement('div');
+  modal.id='agenda-modal';
+  modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  var box=document.createElement('div');
+  box.style.cssText='background:#fff;border-radius:16px;padding:20px;width:100%;max-width:440px;max-height:80vh;overflow-y:auto;';
+  box.innerHTML='<div style="font-size:15px;font-weight:600;margin-bottom:14px;">📅 Ajouter à Google Agenda</div>'+
+    '<div style="font-size:12px;color:#888;margin-bottom:14px;">Appuie sur chaque rappel pour l\'ouvrir dans Google Agenda.</div>'+
+    keys.map(function(k){
+      return '<a href="'+links[k]+'" target="_blank" style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:#FAEEDA;border-radius:10px;margin-bottom:8px;text-decoration:none;color:#633806;font-size:13px;font-weight:500;">'+
+        '<span style="font-size:18px;">'+ICONS[k]+'</span>'+NAMES[k]+'<span style="margin-left:auto;font-size:11px;color:#ba7517;">Ouvrir →</span></a>';
+    }).join('')+
+    '<button id="close-modal-btn" style="width:100%;margin-top:8px;padding:11px;background:#f0f0ed;border:none;border-radius:10px;font-size:14px;cursor:pointer;font-family:inherit;">Fermer</button>';
+  modal.appendChild(box);
+  document.body.appendChild(modal);
+  document.getElementById('close-modal-btn').addEventListener('click',function(){modal.remove();});
+  modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+}
+function showSection(name){
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('section-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+}
+renderResaList();renderTemplates();renderPlanning();
+</script>
+</body>
+</html>
